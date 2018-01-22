@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: bsuprun <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/01/19 18:19:45 by bsuprun           #+#    #+#             */
-/*   Updated: 2018/01/19 21:40:37 by bsuprun          ###   ########.fr       */
+/*   Created: 2018/01/22 20:29:12 by bsuprun           #+#    #+#             */
+/*   Updated: 2018/01/22 21:08:11 by bsuprun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,84 +19,50 @@
 ** We also check fd, *lst and lst to avoid errors.
 */
 
-static t_list	*ft_fd_search(const int fd, t_list **lst)
+static	t_list		*ft_fd_search(const int fd, t_list **lst)
 {
-	t_list		*tmp_lst;
+	t_list			*t_lst;
 
-/*	if (fd <= 0 && !*lst && !lst)
-**	{
-**		free(tmp_lst);
-**		return (0);
-**	}
-*/	
-	tmp_lst = *lst;
-	while (tmp_lst)
+	t_lst = *lst;
+	while (t_lst)
 	{
-		if (tmp_lst->content_size == fd)
-			return (tmp_lst);
-		tmp_lst = tmp_lst->next;
+		if (t_lst->content_size == fd)
+			return (t_lst);
+		t_lst = t_lst->next;
 	}
-	tmp_lst = ft_lstnew("\0", fd);
-	ft_lstadd(lst, tmp_lst);
-	tmp_lst = *lst;
-	return (tmp_lst);
+	free(t_lst);
+	t_lst = ft_lstnew("\0", 1);
+	t_lst->content_size = fd;
+	ft_lstadd(lst, t_lst);
+	free(t_lst);
+	return (*lst);
 }
 
-static int		ft_ret_pos_of_ch_and_copy(char **dest, char *src, char c)
+int					get_next_line(const int fd, char **line)
 {
-	int			i;
-	int			j;
-	int			k;
-
-	i = -1;
-	j = 0;
-	while (src[++i])
-		if (src[i] == c)
-			break ;
-	k = i;
-	if (!(*dest = ft_strnew(i)))
-		return (0);
-	while (src[j] && j < i)
-	{
-		if (!(*dest = ft_strjoin(*dest, (char)src[j])))
-			return (0);
-		j++;
-	}
-/*
-**	while (src[j] && src[j] != c)
-**	{
-**		*dest[j] = src[j];
-**		j++;
-**	}
-**
-*/
-	return (k);
-}
-
-int		get_next_line(const int fd, char **line)
-{
-	static t_list		*lst;
-	t_list				*temp_lst;
-	char				buf[BUFF_SIZE + 1];
-	int					ret;
-	int					i;
+	static t_list	*lst;
+	t_list			*t_lst;
+	char			buf[BUFF_SIZE + 1];
+	int				ret;
 
 	if ((fd < 0 || !line || read(fd, buf, 0) < 0))
 		return (-1);
-	temp_lst = ft_fd_search(fd, &lst);
+	CHECK_MALLOC((lst = ft_lstnew("\0", fd)));
+	t_lst = ft_fd_search(fd, &lst);
 	CHECK_MALLOC((*line = ft_strnew(1)));
 	while ((ret = read(fd, buf, BUFF_SIZE)))
 	{
 		buf[ret] = '\0';
-		CHECK_MALLOC((temp_lst->content = ft_strjoin(temp_lst->content, buf)));
+		CHECK_MALLOC((lst->content = ft_strjoin(t_lst->content, buf)));
 		if (ft_strchr(buf, '\n'))
+		{
+	//		*line = lst->content - ft_strchr(lst->content, '\n');
+	//		lst->content += ft_strchr(lst->content, '\n');
 			break ;
+		}
 	}
-	if (ret < BUFF_SIZE && !ft_strlen(temp_lst->content))
+	if (ret < BUFF_SIZE && !ft_strlen(lst->content))
 		return (0);
-	i = ft_ret_pos_of_ch_and_copy(line, temp_lst->content, '\n');
-	
-	(i < ft_strlen(temp_lst->content)) ? temp_lst->content += (i + 1) : ft_strclr(temp_lst->content);
 	return (1);
 }
 
@@ -106,11 +72,15 @@ int		main(void)
 	char	*line;
 
 	fd = open("test.txt", O_RDONLY);
-	while (get_next_line(fd, &line) == 1)
-	{
-		ft_putendl(line);
-		free(line);
-	}
-	close(fd);
+	char	*str = "abcdefghijklmn";
+	int		i;
+
+	i = ft_strchr(str, 'a');
+	printf("ETO I:%i\n", i);
+//	while (get_next_line(fd, &line) == 1)
+//	{
+//		ft_putendl(line);
+//		free(line);
+//	}
 	return (0);
 }

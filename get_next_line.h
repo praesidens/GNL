@@ -17,7 +17,7 @@
 # include "libft/libft.h"
 
 # define BUFF_SIZE 250
-# define CHECK_MALLOC(x) if (!x) return (-1);
+
 
 int		get_next_line(const int fd, char **line);
 

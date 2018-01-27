@@ -1,86 +1,132 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: bsuprun <marvin@42.fr>                     +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/01/22 20:29:12 by bsuprun           #+#    #+#             */
-/*   Updated: 2018/01/22 21:08:11 by bsuprun          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
 #include <fcntl.h>
+#include <stdio.h>
 
-/*
-** We are trying to search file descriptor.
-** We add file descriptor (if it doesn't exist).
-** We also check fd, *lst and lst to avoid errors.
-*/
-
-static	t_list		*ft_fd_search(const int fd, t_list **lst)
+int		ft_stringchr(char	*str, char	c)
 {
-	t_list			*t_lst;
-
-	t_lst = *lst;
-	while (t_lst)
-	{
-		if (t_lst->content_size == fd)
-			return (t_lst);
-		t_lst = t_lst->next;
-	}
-	free(t_lst);
-	t_lst = ft_lstnew("\0", 1);
-	t_lst->content_size = fd;
-	ft_lstadd(lst, t_lst);
-	free(t_lst);
-	return (*lst);
+	int		i;
+	
+	i = 0;
+	while (str[i] && str[i] != c)
+		i++;
+	return (i);
 }
 
-int					get_next_line(const int fd, char **line)
+int		get_next_line(const int fd, char **line)
 {
 	static t_list	*lst;
-	t_list			*t_lst;
-	char			buf[BUFF_SIZE + 1];
 	int				ret;
+	char			*buf;
+//	char			*buf1;
 
-	if ((fd < 0 || !line || read(fd, buf, 0) < 0))
+	if (fd < 0 || !line)
 		return (-1);
-	CHECK_MALLOC((lst = ft_lstnew("\0", fd)));
-	t_lst = ft_fd_search(fd, &lst);
-	CHECK_MALLOC((*line = ft_strnew(1)));
-	while ((ret = read(fd, buf, BUFF_SIZE)))
+	buf = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1));
+	while (lst && (lst->content_size != (size_t)fd))
+		lst = lst->next;
+	if (!lst)
+	{
+//		printf("NOT LST\n");
+		lst = ft_lstnew("", 1);
+		lst->content_size = fd;
+	}
+
+/*	if (ft_strchr(lst->content, '\n'))
+	{
+		//printf("WE ARE IN FT_STRCHR\n");
+		//printf("LST->CONTENT:%s\n", lst->content);
+		*line = ft_strsub(lst->content, 0, ft_stringchr(lst->content, '\n'));
+	//	printf("*LINE:%s\n", *line);
+		lst->content = ft_strsub(lst->content, ft_stringchr(lst->content, '\n'), ft_strlen(lst->content) - ft_stringchr(lst->content, '\n'));
+	}
+	if (lst->content || ((ret = read(fd, buf, BUFF_SIZE) > 0)))
+		return (1);
+	if (!lst->content)
+		return (0);
+*/
+	while ((ret = read(fd, buf, BUFF_SIZE)) > 0)
 	{
 		buf[ret] = '\0';
-		CHECK_MALLOC((lst->content = ft_strjoin(t_lst->content, buf)));
 		if (ft_strchr(buf, '\n'))
 		{
-	//		*line = lst->content - ft_strchr(lst->content, '\n');
-	//		lst->content += ft_strchr(lst->content, '\n');
-			break ;
+			*line = ft_strsub(buf, 0, ft_stringchr(buf, '\n'));
+			if (!lst->content)
+				lst->content = ft_strsub(buf, ft_stringchr(buf, '\n'), ft_strlen(buf) - ft_stringchr(buf, '\n'));
+			else
+				lst->content = ft_strjoin(lst->content, ft_strsub(buf, ft_stringchr(buf, '\n'), ft_strlen(buf) - ft_stringchr(buf, '\n')));
+			return (1);
 		}
+/*
+		else
+		{
+			buf1 = lst->content;
+			lst->content = ft_strjoin(buf, buf1);
+			ft_strdel(&buf1);
+			return (1);
+		}
+*/
+/*	
+		if (ft_strchr(buf, '\n'))
+		{
+			*line = ft_strsub(buf, 0, ft_stringchr(buf, '\n'));
+			lst->content = ft_strsub(buf, ft_stringchr(buf, '\n'), ft_strlen(buf) - ft_stringchr(buf, '\n'));
+			break ;
+			return (1);
+			*line = ft_strsub(buf, 0, ft_stringchr(buf, '\n'));
+		//	if (lst->content)
+		//		return (1);
+		//	else
+		//		return (0);
+		}
+*/
+		/*
+		else
+		{
+			buf1 = lst->content;
+			lst->content = ft_strjoin(buf1, buf);
+			ft_strdel(&buf1);
+			return (0);
+		}
+		*/
+		if (ret < 0 && !lst->content)
+			return (0);
+/*
+		buf1 = lst->content;
+		lst->content = ft_strjoin(lst->content, buf);
+		ft_strdel(&buf1);
+		if (ft_strchr(lst->content, '\n'))
+		{
+			*line = ft_strsub(lst->content, 0, ft_strlen(lst->content) - ft_stringchr(lst->content, '\n'));
+			lst->content = ft_strsub(lst->content, ft_stringchr(lst->content, '\n'), ft_strlen(lst->content) - ft_strlen(*line));
+			ft_strdel(&buf);
+			return (1);
+		}
+*/
 	}
-	if (ret < BUFF_SIZE && !ft_strlen(lst->content))
+	if (ret < 0 && !lst->content)
 		return (0);
-	return (1);
+	return (-1);
 }
+
 
 int		main(void)
 {
-	int		fd;
 	char	*line;
+//	char	*test;	
+//	char	c;
+	int		fd;
 
+//	test = "abcd'\n'assjjs";
+//	c = '\n';
+	
+//	printf("CHAR POS: %i\n", ft_stringchr(test, c));
 	fd = open("test.txt", O_RDONLY);
-	char	*str = "abcdefghijklmn";
-	int		i;
+	int		i = 1;
 
-	i = ft_strchr(str, 'a');
-	printf("ETO I:%i\n", i);
-//	while (get_next_line(fd, &line) == 1)
-//	{
-//		ft_putendl(line);
-//		free(line);
-//	}
+	get_next_line(fd, &line);
+	printf("%s\n", line);
+	get_next_line(fd, &line);
+	printf("%s\n", line);
+
 	return (0);
 }

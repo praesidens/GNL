@@ -6,7 +6,7 @@
 /*   By: bsuprun <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/27 17:17:35 by bsuprun           #+#    #+#             */
-/*   Updated: 2018/01/27 20:28:14 by bsuprun          ###   ########.fr       */
+/*   Updated: 2018/02/01 21:28:42 by bsuprun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,76 +14,61 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-int				ft_ttt(char *str)
-{
-	if (str[0] == '\0')
-		return (1);
-	else
-		return (0);
-
-}
-int				ft_stringchr(char	*str)
+int				ft_nl(char *str)
 {
 	int		i;
-	
+
 	i = 0;
 	while (str[i] && str[i] != '\n')
 		i++;
 	return (i);
 }
 
-void			trim(t_list **lst, int len)
+int				ft_reader(int fd, t_list **lst, char **line)
 {
-	char	*s;
+	char	buf[BUFF_SIZE + 1];
+	char	*buf1;
+	int		ret;
 
-	s = ft_strsub((*lst)->content, len + 1, ft_strlen((*lst)->content));
-	ft_bzero((*lst)->content, ft_strlen((*lst)->content));
-	free((*lst)->content);
-	(*lst)->content = s;
-	//free(s);
-}
-
-int			mamkin_coder(t_list *lst, char **line)
-{
-	int			i;
-
-	i = ft_stringchr(lst->content);
-	*line = ft_strsub(lst->content, 0, i);
-	trim(&lst, i);
-	return (1);
-}
+	if (!(*lst)->C)
+		return (0);
+	while ((ret = read(fd, buf, BUFF_SIZE)) > 0)
+	{
+		buf[ret] = '\0';
+		buf1 = (*lst)->C;
+		(*lst)->C = ft_strjoin(buf1, buf);
+		ft_strdel(&buf1);
+	}
+	if ((*lst)->C && ft_strchr((*lst)->C, '\n'))
+	{
+		*line = ft_strsub((*lst)->C, 0, ft_nl((*lst)->C));
+		(*lst)->C = ft_strsub((*lst)->C, ft_nl((*lst)->C) + 1,
+				ft_strlen((*lst)->C) - ft_nl((*lst)->C) - 1);
+		return (1);
+	}
+	else if (!ft_strchr((*lst)->C, '\n') && (*lst)->C)
+	{
+		*line = (*lst)->C;
+		(*lst)->C = NULL;
+		return (1);
+	}
+	else
+		return (0);
+}	
+		
 
 int				get_next_line(const int fd, char **line)
 {
 	static t_list	*lst;
-	int				ret;
-	char			buf[BUFF_SIZE + 1];
-	char			*buf1;
+	//int				ret;
 
-	if (fd < 0 || !fd || !line)
+	if (fd < 0 || !line)
 		return (-1);
-	while (lst && (lst->content_size != (size_t)fd))
-		lst = lst->next;
-	if (!lst)
-	{
-		lst = ft_lstnew("", 1);
-		lst->content_size = fd;
-	}
-	while ((ret = read(fd, buf, BUFF_SIZE)) > 0)
-	{
-		buf[ret] = '\0';
-		buf1 = lst->content;
-		lst->content = ft_strjoin(buf1, buf);
-		ft_strdel(&buf1);
-	}
-	//if ((char*)lst->content == '\0')
-	//	 return (0);
-	if (ft_ttt(lst->content))
-		return (0);
-	if (!ft_ttt(lst->content))
-		mamkin_coder(lst, line);
-	return (1);
-	
+	//while (lst && (lst->C_S != (size_t)fd))
+	//	lst = lst->next;
+	if (!lst && (lst = ft_lstnew("", 1)))
+		lst->C_S = fd;
+	return (ft_reader(fd, &lst, line));
 }
 
 /*
@@ -97,6 +82,11 @@ int		main(int ac, char **av)
 //	test = "abcd'\n'assjjs";
 //	c = '\n';
 	
+	if (ac != 2)
+	{
+		printf("VIBERI TXT\n");
+		return (1);
+	}
 //	printf("CHAR POS: %i\n", ft_stringchr(test, c));
 	fd = open(av[1], O_RDONLY);
 //	fd1 = open("test1.txt", O_RDONLY);
@@ -104,28 +94,7 @@ int		main(int ac, char **av)
 
 	int		i = 1;
 	while ((i = get_next_line(fd, &line) > 0))
-	{
 		printf("%s\n", line);
-	}
-
-	get_next_line(fd, &line);
-	printf("%s\n", line);
-	get_next_line(fd, &line);
-	printf("%s\n", line);
-	get_next_line(fd, &line);
-	printf("%s\n", line);
-	get_next_line(fd, &line);
-	printf("%s\n", line);
-
-//	get_next_line(fd1, &line);
-//	printf("%s\n", line);
-//	get_next_line(fd1, &line);
-//	printf("%s\n", line);
-
-//	get_next_line(fd2, &line);
-//	printf("%s\n", line);
-//	get_next_line(fd2, &line);
-//	printf("%s\n", line);
 
 	return (0);
 }

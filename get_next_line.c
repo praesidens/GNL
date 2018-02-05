@@ -6,13 +6,11 @@
 /*   By: bsuprun <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/02/03 18:02:48 by bsuprun           #+#    #+#             */
-/*   Updated: 2018/02/05 13:48:21 by bsuprun          ###   ########.fr       */
+/*   Updated: 2018/02/05 14:00:18 by bsuprun          ###   ########.fr       */
 /*                                                                            */
-/* *********************i***************************************************** */
+/* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <fcntl.h>
-#include <stdio.h>
 
 static int			ft_nl(char *str)
 {
@@ -55,9 +53,8 @@ static int			ft_splitter(t_list *lst, char **line)
 	ft_bzero(lst->C, ft_strlen(lst->C));
 	return (**line ? 1 : 0);
 }
-	
 
-int			get_next_line(const int fd, char **line)
+int					get_next_line(const int fd, char **line)
 {
 	static t_list	*lst;
 	t_list			*tmp;

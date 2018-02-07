@@ -6,7 +6,7 @@
 /*   By: bsuprun <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/02/03 18:02:48 by bsuprun           #+#    #+#             */
-/*   Updated: 2018/02/05 14:00:18 by bsuprun          ###   ########.fr       */
+/*   Updated: 2018/02/05 15:58:36 by bsuprun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ static int			ft_splitter(t_list *lst, char **line)
 	if (ft_strchr(lst->C, '\n'))
 	{
 		*line = ft_strsub(lst->C, 0, ft_nl(lst->C));
+		if (lst->C)
+			free(lst->C);
 		lst->C = ft_strsub(lst->C, ft_nl(lst->C) + 1,
 				ft_strlen(lst->C) - ft_nl(lst->C));
 		return (1);

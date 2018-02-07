@@ -6,7 +6,7 @@
 #    By: bsuprun <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/10/28 18:06:57 by bsuprun           #+#    #+#              #
-#    Updated: 2017/11/09 17:50:14 by bsuprun          ###   ########.fr        #
+#    Updated: 2018/02/07 15:09:22 by bsuprun          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,8 @@ CFLAGS = -Wall -Wextra -Werror
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
+$(NAME):
+	@CC $(CFLAGS) -c $(SRCS)
 	@ar rc $(NAME) $(OBJ)
 
 clean:

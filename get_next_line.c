@@ -25,9 +25,10 @@ static int			ft_nl(char *str)
 static int			ft_reader(int fd, t_list *lst)
 {
 	int		ret;
-	char	buf[BUFF_SIZE + 1];
+	char	*buf;
 	char	*buf1;
 
+	buf = ft_strnew(BUFF_SIZE);
 	while ((ret = read(fd, buf, BUFF_SIZE)) > 0)
 	{
 		buf[ret] = '\0';
@@ -35,20 +36,26 @@ static int			ft_reader(int fd, t_list *lst)
 		lst->C = ft_strjoin(lst->C, buf);
 		ft_strdel(&buf1);
 		if (ft_strchr(lst->C, '\n') || ret != BUFF_SIZE)
+		{
+			ft_strdel(&buf);
 			return (ret);
+		}
 	}
+	ft_strdel(&buf);
 	return (ret);
 }
 
 static int			ft_splitter(t_list *lst, char **line)
 {
+	char	*buf;
+
 	if (ft_strchr(lst->C, '\n'))
 	{
 		*line = ft_strsub(lst->C, 0, ft_nl(lst->C));
-		if (lst->C)
-			free(lst->C);
+		buf = lst->C;	
 		lst->C = ft_strsub(lst->C, ft_nl(lst->C) + 1,
 				ft_strlen(lst->C) - ft_nl(lst->C));
+		ft_strdel(&buf);
 		return (1);
 	}
 	*line = ft_strdup(lst->C);

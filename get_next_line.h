@@ -15,7 +15,7 @@
 # include "libft/libft.h"
 # include <fcntl.h>
 
-# define BUFF_SIZE 10
+# define BUFF_SIZE 50000
 # define C_S content_size
 # define C content
 
